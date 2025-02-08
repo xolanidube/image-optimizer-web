@@ -26,7 +26,10 @@ app.secret_key =  os.environ.get('SECRET_KEY', '20bca4271a595b0dc8643deb1d9085a8
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 # Global queue for progress updates
+# Global variables
 progress_queue = queue.Queue()
+current_output_dir = None
+
 
 def optimize_image(input_path, output_path, total_files, current_file, jpeg_quality=85, convert_png=False):
     """
@@ -119,6 +122,7 @@ def process_images(input_dir, output_dir, jpeg_quality, convert_png):
     total_files = len(image_files)
     
     # Process each image
+    # Process each image
     for idx, (root, file) in enumerate(image_files, 1):
         input_path = os.path.join(root, file)
         rel_path = os.path.relpath(root, input_dir)
@@ -134,6 +138,9 @@ def process_images(input_dir, output_dir, jpeg_quality, convert_png):
             jpeg_quality=jpeg_quality,
             convert_png=convert_png
         )
+    
+    # Signal that processing is complete
+    progress_queue.put({'type': 'processing_complete'})
 
 @app.route('/')
 def index():
@@ -168,6 +175,9 @@ def optimize():
     temp_input_dir = tempfile.mkdtemp()
     temp_output_dir = tempfile.mkdtemp()
     
+    global current_output_dir
+    current_output_dir = temp_output_dir
+    
     zip_path = os.path.join(temp_input_dir, 'upload.zip')
     file.save(zip_path)
     
@@ -188,43 +198,44 @@ def optimize():
 
 @app.route('/optimize-stream')
 def optimize_stream():
-    """
-    Stream optimization progress updates using Server-Sent Events.
-    """
     def generate():
         while True:
             try:
                 # Get progress update from queue
-                data = progress_queue.get(timeout=30)
+                data = progress_queue.get(timeout=5)
                 
-                if data['type'] == 'file_complete' and 'status' in data:
-                    # Create optimized zip when all files are processed
+                # When processing is complete, create the ZIP file
+                if data.get('type') == 'processing_complete':
                     downloads_dir = os.path.join(os.getcwd(), 'downloads')
                     os.makedirs(downloads_dir, exist_ok=True)
                     zip_filename = f"{uuid.uuid4().hex}.zip"
                     zip_file_path = os.path.join(downloads_dir, zip_filename)
                     
+                    # Use the global current_output_dir that was set in /optimize
+                    global current_output_dir
                     with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zip_out:
-                        for root, _, files in os.walk(temp_output_dir):
+                        for root, _, files in os.walk(current_output_dir):
                             for file in files:
                                 file_path = os.path.join(root, file)
-                                arcname = os.path.relpath(file_path, temp_output_dir)
+                                arcname = os.path.relpath(file_path, current_output_dir)
                                 zip_out.write(file_path, arcname)
                     
-                    # Send completion event with zip filename
-                    yield f"data: {json.dumps({'type': 'complete', 'zip_file': zip_filename})}\n\n"
+                    # Send complete event with zip filename and optional full progress
+                    yield f"data: {json.dumps({'type': 'complete', 'zip_file': zip_filename, 'progress': 100})}\n\n"
                     break
                 
+                # Otherwise, send the progress update as-is
                 yield f"data: {json.dumps(data)}\n\n"
                 
             except queue.Empty:
-                # Send keepalive
+                # Send a keepalive event
                 yield f"data: {json.dumps({'type': 'keepalive'})}\n\n"
     
     return Response(
         stream_with_context(generate()),
         mimetype='text/event-stream'
     )
+
 
 @app.route('/download/<filename>')
 def download_file(filename):
