@@ -202,7 +202,7 @@ def optimize_stream():
         while True:
             try:
                 # Get progress update from queue
-                data = progress_queue.get(timeout=5)
+                data = progress_queue.get(timeout=1)
                 
                 # When processing is complete, create the ZIP file
                 if data.get('type') == 'processing_complete':
