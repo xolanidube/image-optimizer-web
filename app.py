@@ -16,7 +16,7 @@ Key modifications:
 Usage:
     python3 app.py
 """
-
+from dotenv import load_dotenv
 import os
 import uuid
 import zipfile
@@ -28,6 +28,10 @@ import threading
 from flask import Flask, request, send_from_directory, render_template, flash, redirect, Response, stream_with_context
 from wand.image import Image as WandImage
 from wand.exceptions import WandException
+
+load_dotenv()
+
+MAGICK_HOME = os.getenv("MAGICK_HOME")
 
 # Initialize Flask app
 app = Flask(__name__)
