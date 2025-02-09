@@ -213,7 +213,7 @@ def optimize_stream():
         while True:
             try:
                 # Get progress update from queue
-                data = progress_queue.get(timeout=1)
+                data = progress_queue.get(timeout=10)
 
                 # When processing is complete, create the ZIP file
                 if data.get('type') == 'processing_complete':
@@ -245,7 +245,8 @@ def optimize_stream():
 
     return Response(
         stream_with_context(generate()),
-        mimetype='text/event-stream'
+        mimetype='text/event-stream',
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'}
     )
 
 

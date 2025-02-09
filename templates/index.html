@@ -293,69 +293,87 @@
             const progressBar = document.getElementById('totalProgress');
             const submitBtn = document.getElementById('submitBtn');
             const downloadBtn = document.getElementById('downloadBtn');
-
+            let eventSource = null; // Global SSE instance
+    
             form.onsubmit = async (e) => {
                 e.preventDefault();
                 
-                // Reset and show results container
+                // Reset UI
                 resultsBody.innerHTML = '';
                 resultsDiv.classList.add('active');
                 loadingOverlay.classList.add('active');
                 submitBtn.disabled = true;
                 
                 const formData = new FormData(form);
-                
+    
                 try {
-                    // Start Server-Sent Events connection
-                    const eventSource = new EventSource('/optimize-stream');
-                    
-                    eventSource.onmessage = (event) => {
-                        const data = JSON.parse(event.data);
-                        
-                        if (data.type === 'progress') {
-                            progressBar.style.width = `${data.progress}%`;
-                        } else if (data.type === 'file_complete') {
-                            addFileRow(data);
-                        } else if (data.type === 'complete') {
-                            eventSource.close();
-                            // Ensure progress bar shows complete progress
-                            progressBar.style.width = "100%";
-                            loadingOverlay.classList.remove('active');
-                            submitBtn.disabled = false;
-                            document.querySelector('.download-link').style.display = 'block';
-                            downloadBtn.setAttribute('data-filename', data.zip_file);
-                        }
-                    };
-
-                    eventSource.onerror = (error) => {
-                        console.error("EventSource error: ", error);
+                    // Close any existing EventSource before starting a new one
+                    if (eventSource) {
                         eventSource.close();
-                        loadingOverlay.classList.remove('active');
-                        submitBtn.disabled = false;
-                        alert("An error occurred while receiving progress updates. Please try again.");
-                    };
-
-                    // Send the form data
+                    }
+    
+                    // Start Server-Sent Events (SSE) connection
+                    startSSE();
+    
+                    // Send the form data to start processing
                     const response = await fetch('/optimize', {
                         method: 'POST',
                         body: formData
                     });
-
+    
                     if (!response.ok) {
                         throw new Error('Upload failed');
                     }
                 } catch (error) {
-                    loadingOverlay.classList.remove('active');
-                    submitBtn.disabled = false;
-                    alert('An error occurred during optimization');
+                    console.error("Upload error:", error);
+                    stopProcessing("An error occurred during optimization.");
                 }
             };
-
+    
+            function startSSE() {
+                eventSource = new EventSource('/optimize-stream');
+    
+                eventSource.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+    
+                    if (data.type === 'progress') {
+                        progressBar.style.width = `${data.progress}%`;
+                    } else if (data.type === 'file_complete') {
+                        addFileRow(data);
+                    } else if (data.type === 'complete') {
+                        eventSource.close();
+                        eventSource = null; // Mark SSE as closed
+                        progressBar.style.width = "100%";
+                        loadingOverlay.classList.remove('active');
+                        submitBtn.disabled = false;
+                        document.querySelector('.download-link').style.display = 'block';
+                        downloadBtn.setAttribute('data-filename', data.zip_file);
+                    }
+                };
+    
+                eventSource.onerror = () => {
+                    console.warn("SSE connection lost. Reconnecting in 3 seconds...");
+                    eventSource.close();
+                    eventSource = null; // Mark SSE as closed
+                    setTimeout(startSSE, 3000); // Retry in 3 seconds
+                };
+            }
+    
+            function stopProcessing(errorMessage) {
+                if (eventSource) {
+                    eventSource.close();
+                    eventSource = null;
+                }
+                loadingOverlay.classList.remove('active');
+                submitBtn.disabled = false;
+                console.error(errorMessage);
+            }
+    
             downloadBtn.onclick = () => {
                 const filename = downloadBtn.getAttribute('data-filename');
                 window.location.href = `/download/${filename}`;
             };
-
+    
             function addFileRow(data) {
                 const row = document.createElement('tr');
                 row.className = 'file-row';
@@ -375,5 +393,6 @@
             }
         });
     </script>
+    
 </body>
 </html>
