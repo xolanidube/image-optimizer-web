@@ -1,398 +1,353 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Real-time Image Optimizer</title>
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --success-color: #22c55e;
-            --error-color: #ef4444;
-            --border-color: #e5e7eb;
-        }
-
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 2rem;
-            background-color: #f8fafc;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background-color: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            color: #1f2937;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .header p {
-            color: #6b7280;
-            line-height: 1.6;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #374151;
-        }
-
-        input[type="file"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px dashed var(--border-color);
-            border-radius: 0.5rem;
-            cursor: pointer;
-        }
-
-        input[type="number"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        button {
-            width: 100%;
-            padding: 0.75rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: #1d4ed8;
-        }
-
-        button:disabled {
-            background-color: #93c5fd;
-            cursor: not-allowed;
-        }
-
-        .results {
-            margin-top: 2rem;
-            display: none;
-        }
-
-        .results.active {
-            display: block;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            background-color: white;
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            background-color: #f8fafc;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .file-row {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        .progress-bar {
-            height: 4px;
-            background-color: #e5e7eb;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background-color: var(--primary-color);
-            width: 0%;
-            transition: width 0.3s ease-in-out;
-        }
-
-        .saving-positive {
-            color: var(--success-color);
-        }
-
-        .saving-negative {
-            color: var(--error-color);
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .status-processing {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-success {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-
-        .status-error {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .flash {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            background-color: #fee2e2;
-            color: #991b1b;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>Real-time Image Optimizer</title>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --success-color: #22c55e;
+      --error-color: #ef4444;
+      --border-color: #e5e7eb;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background-color: #f8fafc;
+      color: #1f2937;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .header h1 {
+      color: #1f2937;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .header p {
+      color: #6b7280;
+      line-height: 1.6;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #374151;
+    }
+    input[type="file"], input[type="number"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px dashed var(--border-color);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    button:disabled {
+      background-color: #93c5fd;
+      cursor: not-allowed;
+    }
+    .results {
+      margin-top: 2rem;
+      display: none;
+    }
+    .results.active {
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background-color: white;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th {
+      background-color: #f8fafc;
+      font-weight: 500;
+      color: #374151;
+    }
+    .file-row {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .progress-bar {
+      height: 4px;
+      background-color: #e5e7eb;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--primary-color);
+      width: 0%;
+      transition: width 0.3s ease-in-out;
+    }
+    .saving-positive {
+      color: var(--success-color);
+    }
+    .saving-negative {
+      color: var(--error-color);
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .status-processing { background-color: #dbeafe; color: #1e40af; }
+    .status-success { background-color: #dcfce7; color: #166534; }
+    .status-error { background-color: #fee2e2; color: #991b1b; }
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .loading-overlay.active {
+      display: flex;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .flash {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+      background-color: #fee2e2;
+      color: #991b1b;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Real-time Image Optimizer</h1>
-            <p>
-                Upload a ZIP file containing JPEG and PNG images to optimize them. Watch real-time progress
-                as each image is processed and optimized.
-            </p>
-        </div>
-
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="flash">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
-        <form id="optimizerForm" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="zip_file">ZIP File of Images:</label>
-                <input type="file" id="zip_file" name="zip_file" accept=".zip" required>
-            </div>
-            <div class="form-group">
-                <label for="jpeg_quality">JPEG Quality (1-100):</label>
-                <input type="number" id="jpeg_quality" name="jpeg_quality" value="85" min="1" max="100">
-            </div>
-            <div class="form-group checkbox-group">
-                <input type="checkbox" id="convert_png" name="convert_png">
-                <label for="convert_png">Convert PNG to JPEG (if no transparency)</label>
-            </div>
-            <button type="submit" id="submitBtn">Optimize Images</button>
-        </form>
-
-        <div class="results" id="results">
-            <div class="progress-bar">
-                <div class="progress-bar-fill" id="totalProgress"></div>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>File Name</th>
-                        <th>Original Size</th>
-                        <th>Optimized Size</th>
-                        <th>Space Saved</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="resultsBody">
-                </tbody>
-            </table>
-            <div class="download-link" style="display: none; margin-top: 2rem; text-align: center;">
-                <button id="downloadBtn" class="download-button">Download Optimized Images</button>
-            </div>
-        </div>
+  <div class="container">
+    <div class="header">
+      <h1>Real-time Image Optimizer</h1>
+      <p>
+        Upload a ZIP file containing images (JPEG, PNG, GIF, BMP, TIFF, WEBP) to optimize them. Watch live progress as each image is processed.
+      </p>
     </div>
 
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form id="optimizerForm" method="post" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="zip_file">ZIP File of Images:</label>
+        <input type="file" id="zip_file" name="zip_file" accept=".zip" required>
+      </div>
+      <div class="form-group">
+        <label for="jpeg_quality">JPEG Quality (1-100):</label>
+        <input type="number" id="jpeg_quality" name="jpeg_quality" value="85" min="1" max="100">
+      </div>
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="convert_png" name="convert_png">
+        <label for="convert_png">Convert PNG to JPEG (if no transparency)</label>
+      </div>
+      <button type="submit" id="submitBtn">Optimize Images</button>
+    </form>
+
+    <!-- Download button placed above the summary table -->
+    <div class="download-link" id="downloadLinkTop" style="display: none; margin-top: 2rem; text-align: center;">
+      <button id="downloadBtnTop" class="download-button">Download Optimized Images</button>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('optimizerForm');
-            const resultsDiv = document.getElementById('results');
-            const resultsBody = document.getElementById('resultsBody');
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            const progressBar = document.getElementById('totalProgress');
-            const submitBtn = document.getElementById('submitBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
-            let eventSource = null; // Global SSE instance
-    
-            form.onsubmit = async (e) => {
-                e.preventDefault();
-                
-                // Reset UI
-                resultsBody.innerHTML = '';
-                resultsDiv.classList.add('active');
-                loadingOverlay.classList.add('active');
-                submitBtn.disabled = true;
-                
-                const formData = new FormData(form);
-    
-                try {
-                    // Close any existing EventSource before starting a new one
-                    if (eventSource) {
-                        eventSource.close();
-                    }
-    
-                    // Start Server-Sent Events (SSE) connection
-                    startSSE();
-    
-                    // Send the form data to start processing
-                    const response = await fetch('/optimize', {
-                        method: 'POST',
-                        body: formData
-                    });
-    
-                    if (!response.ok) {
-                        throw new Error('Upload failed');
-                    }
-                } catch (error) {
-                    console.error("Upload error:", error);
-                    stopProcessing("An error occurred during optimization.");
-                }
-            };
-    
-            function startSSE() {
-                eventSource = new EventSource('/optimize-stream');
-    
-                eventSource.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-    
-                    if (data.type === 'progress') {
-                        progressBar.style.width = `${data.progress}%`;
-                    } else if (data.type === 'file_complete') {
-                        addFileRow(data);
-                    } else if (data.type === 'complete') {
-                        eventSource.close();
-                        eventSource = null; // Mark SSE as closed
-                        progressBar.style.width = "100%";
-                        loadingOverlay.classList.remove('active');
-                        submitBtn.disabled = false;
-                        document.querySelector('.download-link').style.display = 'block';
-                        downloadBtn.setAttribute('data-filename', data.zip_file);
-                    }
-                };
-    
-                eventSource.onerror = () => {
-                    console.warn("SSE connection lost. Reconnecting in 3 seconds...");
-                    eventSource.close();
-                    eventSource = null; // Mark SSE as closed
-                    setTimeout(startSSE, 3000); // Retry in 3 seconds
-                };
-            }
-    
-            function stopProcessing(errorMessage) {
-                if (eventSource) {
-                    eventSource.close();
-                    eventSource = null;
-                }
-                loadingOverlay.classList.remove('active');
-                submitBtn.disabled = false;
-                console.error(errorMessage);
-            }
-    
-            downloadBtn.onclick = () => {
-                const filename = downloadBtn.getAttribute('data-filename');
-                window.location.href = `/download/${filename}`;
-            };
-    
-            function addFileRow(data) {
-                const row = document.createElement('tr');
-                row.className = 'file-row';
-                
-                const savingClass = data.saving_percentage >= 0 ? 'saving-positive' : 'saving-negative';
-                const statusClass = `status-${data.status.toLowerCase()}`;
-                
-                row.innerHTML = `
-                    <td>${data.file_name}</td>
-                    <td>${(data.original_size / 1024).toFixed(2)} KB</td>
-                    <td>${(data.optimized_size / 1024).toFixed(2)} KB</td>
-                    <td class="${savingClass}">${data.saving_percentage.toFixed(2)}%</td>
-                    <td><span class="status-badge ${statusClass}">${data.status}</span></td>
-                `;
-                
-                resultsBody.appendChild(row);
-            }
-        });
-    </script>
-    
+    <div class="results" id="results">
+      <div class="progress-bar">
+        <div class="progress-bar-fill" id="totalProgress"></div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>File Name</th>
+            <th>Original Size</th>
+            <th>Optimized Size</th>
+            <th>Space Saved</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Download button placed below the summary table -->
+    <div class="download-link" id="downloadLinkBottom" style="display: none; margin-top: 2rem; text-align: center;">
+      <button id="downloadBtnBottom" class="download-button">Download Optimized Images</button>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('optimizerForm');
+      const resultsDiv = document.getElementById('results');
+      const resultsBody = document.getElementById('resultsBody');
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const progressBar = document.getElementById('totalProgress');
+      const submitBtn = document.getElementById('submitBtn');
+      const downloadBtnTop = document.getElementById('downloadBtnTop');
+      const downloadBtnBottom = document.getElementById('downloadBtnBottom');
+      const downloadLinkTop = document.getElementById('downloadLinkTop');
+      const downloadLinkBottom = document.getElementById('downloadLinkBottom');
+      let eventSource = null; // Global SSE instance
+
+      // Shared download function for both buttons
+      const downloadFunction = () => {
+        const filename = downloadBtnTop.getAttribute('data-filename');
+        window.location.href = `/download/${filename}`;
+      };
+
+      downloadBtnTop.onclick = downloadFunction;
+      downloadBtnBottom.onclick = downloadFunction;
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+
+        // Reset UI
+        resultsBody.innerHTML = '';
+        resultsDiv.classList.add('active');
+        loadingOverlay.classList.add('active');
+        submitBtn.disabled = true;
+        downloadLinkTop.style.display = 'none';
+        downloadLinkBottom.style.display = 'none';
+
+        const formData = new FormData(form);
+
+        try {
+          // Close any existing EventSource before starting a new one
+          if (eventSource) { eventSource.close(); }
+
+          // Start Server-Sent Events (SSE) connection
+          startSSE();
+
+          // Send the form data to start processing
+          const response = await fetch('/optimize', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!response.ok) { throw new Error('Upload failed'); }
+        } catch (error) {
+          console.error("Upload error:", error);
+          stopProcessing("An error occurred during optimization.");
+        }
+      };
+
+      function startSSE() {
+        eventSource = new EventSource('/optimize-stream');
+
+        eventSource.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.type === 'progress') {
+            progressBar.style.width = `${data.progress}%`;
+          } else if (data.type === 'file_complete') {
+            addFileRow(data);
+          } else if (data.type === 'complete') {
+            eventSource.close();
+            eventSource = null;
+            progressBar.style.width = "100%";
+            loadingOverlay.classList.remove('active');
+            submitBtn.disabled = false;
+            // Show both download links and assign the filename to both buttons
+            downloadLinkTop.style.display = 'block';
+            downloadLinkBottom.style.display = 'block';
+            downloadBtnTop.setAttribute('data-filename', data.zip_file);
+            downloadBtnBottom.setAttribute('data-filename', data.zip_file);
+          }
+        };
+
+        eventSource.onerror = () => {
+          console.warn("SSE connection lost. Reconnecting in 3 seconds...");
+          eventSource.close();
+          eventSource = null;
+          setTimeout(startSSE, 3000);
+        };
+      }
+
+      function stopProcessing(errorMessage) {
+        if (eventSource) { eventSource.close(); eventSource = null; }
+        loadingOverlay.classList.remove('active');
+        submitBtn.disabled = false;
+        console.error(errorMessage);
+      }
+
+      function addFileRow(data) {
+        const row = document.createElement('tr');
+        row.className = 'file-row';
+
+        const savingClass = data.saving_percentage >= 0 ? 'saving-positive' : 'saving-negative';
+        const statusClass = `status-${data.status.toLowerCase()}`;
+
+        row.innerHTML = `
+          <td>${data.file_name}</td>
+          <td>${(data.original_size / 1024).toFixed(2)} KB</td>
+          <td>${(data.optimized_size / 1024).toFixed(2)} KB</td>
+          <td class="${savingClass}">${data.saving_percentage.toFixed(2)}%</td>
+          <td><span class="status-badge ${statusClass}">${data.status}</span></td>
+        `;
+
+        resultsBody.appendChild(row);
+      }
+    });
+  </script>
 </body>
 </html>
