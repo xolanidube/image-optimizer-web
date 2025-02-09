@@ -255,7 +255,8 @@ def download_file(filename):
     """
     Route to download the generated ZIP file.
     """
-    return send_from_directory('downloads', filename, as_attachment=True)
+    downloads_dir = "/tmp/downloads"
+    return send_from_directory(downloads_dir, filename, as_attachment=True)
 
 
 if __name__ == '__main__':
